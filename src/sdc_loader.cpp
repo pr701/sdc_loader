@@ -154,28 +154,228 @@ static void apply_symbols(void)
 }
 
 //--------------------------------------------------------------------------
+
+enum EVariableSize
+{
+	EByte = 0,
+	EWord,
+	EDword,
+};
+
+void add_name(ea_t address, int var_type, const char* name, const char* comment)
+{
+	switch (var_type)
+	{
+	case EByte:
+		create_byte(address, 1);
+		break;
+	case EWord:
+		create_word(address, 2);
+		break;
+	case EDword:
+		create_dword(address, 4);
+		break;
+	default:
+		break;
+	}
+	if (name) set_name(address, name, SN_PUBLIC | SN_AUTO | SN_NOWARN);
+	if (comment) set_cmt(address, comment, false);
+}
+
+void add_ccn_segment()
+{
+	add_segment(0xFF000000, 0xFF000048, "CCN", "DATA", NULL);
+	add_name(0xFF000000, EDword, "CCN_PTEH", "Page table entry high register");
+	add_name(0xFF000004, EDword, "CCN_PTEL", "Page table entry low register");
+	add_name(0xFF000008, EDword, "CCN_TTB", "Translation table base register");
+	add_name(0xFF00000C, EDword, "CCN_TEA", "TLB exception address register");
+	add_name(0xFF000010, EDword, "CCN_MMUCR", "MMU control register");
+	add_name(0xFF000014, EByte, "CCN_BASRA", "Break ASID register A");
+	add_name(0xFF000018, EByte, "CCN_BASRB", "Break ASID register B");
+	add_name(0xFF00001C, EDword, "CCN_CCR", "Cache control register");
+	add_name(0xFF000020, EDword, "CCN_TRA", "TRAPA exception register");
+	add_name(0xFF000024, EDword, "CCN_EXPEVT", "Exception event register");
+	add_name(0xFF000028, EDword, "CCN_INTEVT", "Interrupt event register");
+	add_name(0xFF000030, EDword, "CCN_PVR", "Processor version register");
+	add_name(0xFF000034, EDword, "CCN_PTEA", "Page table entry assistance register");
+	add_name(0xFF000038, EDword, "CCN_QACR0", "Queue address control register 0");
+	add_name(0xFF00003C, EDword, "CCN_QACR1", "Queue address control register 1");
+	add_name(0xFF000044, EDword, "CCN_PRR", "Product register");
+}
+
+void add_ubc_segment()
+{
+	add_segment(0xFF200000, 0xFF200024, "UBC", "DATA", NULL);
+	add_name(0xFF200000, EDword, "UBC_BARA", "Break address register A");
+	add_name(0xFF200004, EByte, "UBC_BAMRA", "Break address mask register A");
+	add_name(0xFF200008, EWord, "UBC_BBRA", "Break bus cycle register A");
+	add_name(0xFF20000C, EDword, "UBC_BARB", "Break address register B");
+	add_name(0xFF200010, EByte, "UBC_BAMRB", "Break address mask register B");
+	add_name(0xFF200014, EWord, "UBC_BBRB", "Break bus cycle register B");
+	add_name(0xFF200018, EDword, "UBC_BDRB", "Break data register B");
+	add_name(0xFF20001C, EDword, "UBC_BDMRB", "Break data mask register B");
+	add_name(0xFF200020, EWord, "UBC_BRCR", "Break control register");
+}
+
+void add_bsc_segment()
+{
+	add_segment(0xFF800000, 0xFF80004C, "BSC", "DATA", NULL);
+	add_name(0xFF800000, EDword, "BSC_BCR1", "Bus control register 1");
+	add_name(0xFF800004, EWord, "BSC_BCR2", "Bus control register 2");
+	add_name(0xFF800008, EDword, "BSC_WCR1", "Wait state control register 1");
+	add_name(0xFF80000C, EDword, "BSC_WCR2", "Wait state control register 2");
+	add_name(0xFF800010, EDword, "BSC_WCR3", "Wait state control register 3");
+	add_name(0xFF800014, EDword, "BSC_MCR", "Memory control register");
+	add_name(0xFF800018, EWord, "BSC_PCR", "PCMCIA control register");
+	add_name(0xFF80001C, EWord, "BSC_RTCSR", "Refresh timer control/status register");
+	add_name(0xFF800020, EWord, "BSC_RTCNT", "Refresh timer counter");
+	add_name(0xFF800024, EWord, "BSC_RTCOR", "Refresh time constant counter");
+	add_name(0xFF800028, EWord, "BSC_RFCR", "Refresh count register");
+	add_name(0xFF80002C, EDword, "BSC_PCTRA", "Port control register A");
+	add_name(0xFF800030, EWord, "BSC_PDTRA", "Port data register A");
+	add_name(0xFF800040, EDword, "BSC_PCTRB", "Port control register B");
+	add_name(0xFF800044, EWord, "BSC_PDTRB", "Port data register B");
+	add_name(0xFF800048, EWord, "BSC_GPIOC", "GPIO interrupt control register");
+
+	add_segment(0xFF900000, 0xFF910000, "BSC_SDMR2", "BSS", NULL);
+	add_name(0xFF900000, EDword, "BSC_SDMR2", "Synchronous DRAM mode registers for area 2");
+
+	add_segment(0xFF940000, 0xFF950000, "BSC_SDMR3", "BSS", NULL);
+	add_name(0xFF940000, EDword, "BSC_SDMR3", "Synchronous DRAM mode registers for area 3");
+}
+
+void add_dmac_segment()
+{
+	add_segment(0xFFA00000, 0xFFA00044, "DMAC", "DATA", NULL);
+	add_name(0xFFA00000, EDword, "DMAC_SAR0", "DMA source address register 0");
+	add_name(0xFFA00004, EDword, "DMAC_DAR0", "DMA destination address register 0");
+	add_name(0xFFA00008, EDword, "DMAC_DMATCR0", "DMA transfer count register 0");
+	add_name(0xFFA0000C, EDword, "DMAC_CHCR0", "DMA channel control register 0");
+	add_name(0xFFA00010, EDword, "DMAC_SAR1", "DMA source address register 1");
+	add_name(0xFFA00014, EDword, "DMAC_DAR1", "DMA destination address register 1");
+	add_name(0xFFA00018, EDword, "DMAC_DMATCR1", "DMA transfer count register 1");
+	add_name(0xFFA0001C, EDword, "DMAC_CHCR1", "DMA channel control register 1");
+	add_name(0xFFA00020, EDword, "DMAC_SAR2", "DMA source address register 2");
+	add_name(0xFFA00024, EDword, "DMAC_DAR2", "DMA destination address register 2");
+	add_name(0xFFA00028, EDword, "DMAC_DMATCR2", "DMA transfer count register 2");
+	add_name(0xFFA0002C, EDword, "DMAC_CHCR2", "DMA channel control register 2");
+	add_name(0xFFA00030, EDword, "DMAC_SAR3", "DMA source address register 3");
+	add_name(0xFFA00034, EDword, "DMAC_DAR3", "DMA destination address register 3");
+	add_name(0xFFA00038, EDword, "DMAC_DMATCR3", "DMA transfer count register 3");
+	add_name(0xFFA0003C, EDword, "DMAC_CHCR3", "DMA channel control register 3");
+	add_name(0xFFA00040, EDword, "DMAC_DMAOR", "DMA operation register");
+}
+
+void add_cpg_segment()
+{
+	add_segment(0xFFC00000, 0xFFC00014, "CPG", "DATA", NULL);
+	add_name(0xFFC00000, EWord, "CPG_FRQCR", "Frequency control register");
+	add_name(0xFFC00004, EByte, "CPG_STBCR", "Standby control register");
+	add_name(0xFFC00008, EWord, "CPG_WTCNT", "Watchdog timer counter");
+	add_name(0xFFC0000C, EWord, "CPG_WTCSR", "Watchdog timer control/status register");
+	add_name(0xFFC00010, EByte, "CPG_STBCR2", "Standby control register 2");
+}
+
+void add_rtc_segment()
+{
+	add_segment(0xFFC80000, 0xFFC80040, "RTC", "DATA", NULL);
+	add_name(0xFFC80000, EByte, "RTC_R64CNT", "64 Hz counter");
+	add_name(0xFFC80004, EByte, "RTC_RSECCNT", "Second counter");
+	add_name(0xFFC80008, EByte, "RTC_RMINCNT", "Minute counter");
+	add_name(0xFFC8000C, EByte, "RTC_RHRCNT", "Hour counter");
+	add_name(0xFFC80010, EByte, "RTC_RWKCNT", "Day-of-week counter");
+	add_name(0xFFC80014, EByte, "RTC_RDAYCNT", "Day counter");
+	add_name(0xFFC80018, EByte, "RTC_RMONCNT", "Month counter");
+	add_name(0xFFC8001C, EWord, "RTC_RYRCNT", "Year counter");
+	add_name(0xFFC80020, EByte, "RTC_RSECAR", "Second alarm register");
+	add_name(0xFFC80024, EByte, "RTC_RMINAR", "Minute alarm register");
+	add_name(0xFFC80028, EByte, "RTC_RHRAR", "Hour alarm register");
+	add_name(0xFFC8002C, EByte, "RTC_RWKAR", "Day-of-week alarm register");
+	add_name(0xFFC80030, EByte, "RTC_RDAYAR", "Day alarm register");
+	add_name(0xFFC80034, EByte, "RTC_RMONAR", "Month alarm register");
+	add_name(0xFFC80038, EByte, "RTC_RCR1", "RTC control register 1");
+	add_name(0xFFC8003C, EByte, "RTC_RCR2", "RTC control register 2");
+}
+
+void add_intc_segment()
+{
+	add_segment(0xFFD00000, 0xFFD00010, "INTC", "DATA", NULL);
+	add_name(0xFFD00000, EWord, "INTC_ICR", "Interrupt control register");
+	add_name(0xFFD00004, EWord, "INTC_IPRA", "Interrupt priority register A");
+	add_name(0xFFD00008, EWord, "INTC_IPRB", "Interrupt priority register B");
+	add_name(0xFFD0000C, EWord, "INTC_IPRC", "Interrupt priority register C");
+}
+
+void add_tmu_segment()
+{
+	add_segment(0xFFD80000, 0xFFD80030, "TMU", "DATA", NULL);
+	add_name(0xFFD80000, EByte, "TMU_TOCR", "Timer output control register");
+	add_name(0xFFD80004, EByte, "TMU_TSTR", "Timer start register");
+	add_name(0xFFD80008, EDword, "TMU_TCOR0", "Timer constant register 0");
+	add_name(0xFFD8000C, EDword, "TMU_TCNT0", "Timer counter 0");
+	add_name(0xFFD80010, EWord, "TMU_TCR0", "Timer control register 0");
+	add_name(0xFFD80014, EDword, "TMU_TCOR1", "Timer constant register 1");
+	add_name(0xFFD80018, EDword, "TMU_TCNT1", "Timer counter 1");
+	add_name(0xFFD8001C, EWord, "TMU_TCR1", "Timer control register 1");
+	add_name(0xFFD80020, EDword, "TMU_TCOR2", "Timer constant register 2");
+	add_name(0xFFD80024, EDword, "TMU_TCNT2", "Timer counter 2");
+	add_name(0xFFD80028, EWord, "TMU_TCR2", "Timer control register 2");
+	add_name(0xFFD8002C, EDword, "TMU_TCPR2", "Input capture register");
+}
+
+void add_sci_segment() 
+{
+	add_segment(0xFFE00000, 0xFFE00020, "SCI", "DATA", NULL);
+	add_name(0xFFE00000, EByte, "SCI_SCSMR1", "Serial mode register");
+	add_name(0xFFE00004, EByte, "SCI_SCBRR1", "Bit rate register");
+	add_name(0xFFE00008, EByte, "SCI_SCSCR1", "Serial control register");
+	add_name(0xFFE0000C, EByte, "SCI_SCTDR1", "Transmit data register");
+	add_name(0xFFE00010, EByte, "SCI_SCSSR1", "Serial status register");
+	add_name(0xFFE00014, EByte, "SCI_SCRDR1", "Receive data register");
+	add_name(0xFFE00018, EByte, "SCI_SCSCMR1", "Smart card mode register");
+	add_name(0xFFE0001C, EByte, "SCI_SCSPTR1", "Serial port register");
+}
+
+void add_scif_segment()
+{
+	add_segment(0xFFE80000, 0xFFE80028, "SCIF", "DATA", NULL);
+	add_name(0xFFE80000, EWord, "SCIF_SCSMR2", "Serial mode register");
+	add_name(0xFFE80004, EByte, "SCIF_SCBRR2", "Bit rate register");
+	add_name(0xFFE80008, EWord, "SCIF_SCSCR2", "Serial control register");
+	add_name(0xFFE8000C, EByte, "SCIF_SCFTDR2", "Transmit FIFO data register");
+	add_name(0xFFE80010, EWord, "SCIF_SCFSR2", "Serial status register");
+	add_name(0xFFE80014, EByte, "SCIF_SCFRDR2", "Receive FIFO data register");
+	add_name(0xFFE80018, EWord, "SCIF_SCFCR2", "FIFO control register");
+	add_name(0xFFE8001C, EWord, "SCIF_SCFDR2", "FIFO data count register");
+	add_name(0xFFE80020, EWord, "SCIF_SCSPTR2", "Serial port register");
+	add_name(0xFFE80024, EWord, "SCIF_SCLSR2", "Line status register");
+}
+
+void add_hudi_segment()
+{
+	add_segment(0xFFF00000, 0xFFF0000C, "HUDI", "DATA", NULL);
+	add_name(0xFFF00000, EWord, "HUDI_SDIR", "Instruction register");
+	add_name(0xFFF00008, EDword, "HUDI_SDDR", "Data register");
+}
+
+//--------------------------------------------------------------------------
 void idaapi load_file(linput_t *li, ushort neflags, const char *fileformatname)
 {
     if (ph.id != PLFM_SH) {
 		set_processor_type("SH4", SETPROC_LOADER_NON_FATAL); // Motorola 68000
 	}
 
-    add_segment(0xFF000000, 0xFF000048, "CCN", "DATA", NULL);
-    add_segment(0xFF200000, 0xFF200024, "UBC", "DATA", NULL);
-
-    add_segment(0xFF800000, 0xFF80004C, "BSC", "DATA", NULL);
-
-    add_segment(0xFF900000, 0xFF910000, "BSC_SDMR2", "BSS", NULL);
-    add_segment(0xFF940000, 0xFF950000, "BSC_SDMR3", "BSS", NULL);
-    add_segment(0xFFA00000, 0xFFA00044, "DMAC", "DATA", NULL);
-    add_segment(0xFFC00000, 0xFFC00014, "CPG", "DATA", NULL);
-
-    add_segment(0xFFC80000, 0xFFC80040, "RTC", "DATA", NULL);
-    add_segment(0xFFD00000, 0xFFD00010, "INTC", "DATA", NULL);
-    add_segment(0xFFD80000, 0xFFD80030, "TMU", "DATA", NULL);
-    add_segment(0xFFE00000, 0xFFE00020, "SCI", "DATA", NULL);
-    add_segment(0xFFE80000, 0xFFE80028, "SCIF", "DATA", NULL);
-    add_segment(0xFFF00000, 0xFFF0000C, "HUDI", "DATA", NULL);
+	add_ccn_segment();
+	add_ubc_segment();
+	add_bsc_segment();
+	add_dmac_segment();
+	add_cpg_segment();
+	add_rtc_segment();
+	add_intc_segment();
+	add_tmu_segment();
+	add_sci_segment();
+	add_scif_segment();
+	add_hudi_segment();
 
 	unsigned int size = qlsize(li); // size of rom
 	qlseek(li, 0, SEEK_SET);
